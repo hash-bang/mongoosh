@@ -6,6 +6,8 @@ import getColor from './lib/getColor.js';
 import joi from 'joi';
 import os from 'node:os';
 import mongoose from 'mongoose';
+import mongooseConnect from './lib/mongooseConnect.js';
+import mongooshCommands from './lib/mongooshCommands.js';
 import path from 'path';
 import program from 'commander';
 import repl from 'node:repl';
@@ -30,6 +32,7 @@ const settings = {
 		classes: [
 			mongoose.Query,
 		],
+		commands: mongooshCommands,
 	},
 	inspect: {
 		depth: 2,
@@ -47,6 +50,12 @@ const settings = {
 		preview: true,
 		history: '.mongoosh.history',
 	},
+};
+// }}}
+// MongooSh context (used with commands to access internals) {{{
+const mongooshContext = {
+	repl: undefined,
+	settings,
 };
 // }}}
 
@@ -76,6 +85,7 @@ Promise.resolve()
 		&& joi.object({ // Check it validates
 			eval: {
 				classes: joi.array(),
+				commands: joi.object().required(),
 			},
 			context: joi.object().required(),
 			inspect: {
@@ -107,22 +117,12 @@ Promise.resolve()
 	.then(()=> {
 		if (!settings.mongoose.autoConnect) return;
 
-		return mongoose.connect(`mongodb://${settings.mongoose.host}/${settings.mongoose.database || 'test'}`, {
-			useNewUrlParser: true,
-			useUnifiedTopology: true,
-		})
-		.then(()=> {
-			settings.context.db = {};
-			mongoose.connection.db.listCollections().toArray()
-				.then(collections => collections.forEach(collection =>
-					settings.context.db[collection.name] = mongoose.model(collection.name, {}) // Init with blank schema
-				))
-		})
+		mongooseConnect.call(mongooshContext);
 	})
 	// }}}
 	// Repl loop {{{
 	.then(()=> new Promise(resolve => {
-		const replInstance = repl
+		const replInstance = mongooshContext.repl = repl
 			.start({
 				// BUGFIX: If we are reading from a pipe we need ttys to provide us a user terminal rather than trust process.std{in,out} {{{
 				input: ttys.stdin,
@@ -137,7 +137,17 @@ Promise.resolve()
 				writer: function(doc) {
 					return util.inspect(doc, settings.inspect);
 				},
-				eval: (cmd, context, filename, finish) => {
+				eval: (cmd, context, filename, finish) => { // {{{
+					// Try defined command {{{
+					var cmdBits = cmd.split(/\s+/);
+					cmdBits[0] = cmdBits[0].toLowerCase(); // Lower case command operand automatically to fix case weirdness
+					if (settings.eval.commands[cmdBits[0]]) { // Command exists
+						return Promise.resolve(settings.eval.commands[cmdBits[0]].apply(mongooshContext, cmdBits.slice(1)))
+							.then(result => finish(null, result))
+							.catch(finish)
+					}
+					// }}}
+					// Try to run in context {{{
 					try {
 						var result = vm.runInContext(cmd, context, filename);
 						if (settings.eval.classes.some(evalClass => result instanceof evalClass)) {
@@ -149,7 +159,8 @@ Promise.resolve()
 					} catch (e) {
 						finish(e);
 					}
-				},
+					// }}}
+				}, // }}}
 			})
 			.on('exit', resolve)
 
