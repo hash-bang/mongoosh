@@ -2,21 +2,29 @@ MongooSh
 ========
 A Mongoose command line shell.
 
+**Features:**
+* It's Mongoose! A much easier to understand wrapper around Mongo with less foot-guns
+* Customizable config files
+* STFU about server messages on boot (e.g. "Oh no you're not using XFS")
+
+
 
 Built in commands
 -----------------
 
-| Command    | Description                                                                                                                                                    |
-|------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `db`       | The loaded `Mongoose.model` instance                                                                                                                           |
-| `settings` | The settings structure MongooSh was booted with                                                                                                                |
-| `.break`   | When in the process of inputting a multi-line expression, enter the `.break` command (or press Ctrl+C) to abort further input or processing of that expression |
-| `.clear`   | Resets the REPL context to an empty object and clears any multi-line expression being input                                                                    |
-| `.exit`    | Close the I/O stream, causing the REPL to exit                                                                                                                 |
-| `.help`    | Show the list of special commands                                                                                                                              |
-| `.save`    | Save the current REPL session to a file e.g. `.save ./file/to/save.js`                                                                                         |
-| `.load`    | Load a file into the current REPL session e.g. `.load ./file/to/load.js`                                                                                       |
-| `.editor`  | Enter editor mode (Ctrl+D to finish, Ctrl+C to cancel)                                                                                                         |
+| Command            | Description                                                                                                                                                    |
+|--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `db`               | The loaded `Mongoose.model` instance                                                                                                                           |
+| `settings`         | The settings structure MongooSh was booted with                                                                                                                |
+| `use <db>`         | Switch to an alternative datbase by name                                                                                                                       |
+| `show collections` | List available collections
+| `.break`           | When in the process of inputting a multi-line expression, enter the `.break` command (or press Ctrl+C) to abort further input or processing of that expression |
+| `.clear`           | Resets the REPL context to an empty object and clears any multi-line expression being input                                                                    |
+| `.exit`            | Close the I/O stream, causing the REPL to exit                                                                                                                 |
+| `.help`            | Show the list of special commands                                                                                                                              |
+| `.save`            | Save the current REPL session to a file e.g. `.save ./file/to/save.js`                                                                                         |
+| `.load`            | Load a file into the current REPL session e.g. `.load ./file/to/load.js`                                                                                       |
+| `.editor`          | Enter editor mode (Ctrl+D to finish, Ctrl+C to cancel)                                                                                                         |
 
 
 Settings
