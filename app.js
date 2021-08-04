@@ -117,7 +117,7 @@ Promise.resolve()
 	.then(()=> {
 		if (!settings.mongoose.autoConnect) return;
 
-		mongooseConnect.call(mongooshContext);
+		return mongooseConnect.call(mongooshContext);
 	})
 	// }}}
 	// Repl loop {{{
