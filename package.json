@@ -3,9 +3,10 @@
   "version": "0.0.0",
   "description": "Mongoose command line shell",
   "main": "app.js",
-  "scripts": {
-    "test": "mocha"
+  "bin": {
+    "mongoosh": "./app.js"
   },
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hash-bang/mongoosh.git"
@@ -22,5 +23,10 @@
   "bugs": {
     "url": "https://github.com/hash-bang/mongoosh/issues"
   },
-  "homepage": "https://github.com/hash-bang/mongoosh#readme"
+  "homepage": "https://github.com/hash-bang/mongoosh#readme",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^8.1.0",
+    "ttys": "^0.0.3"
+  }
 }
