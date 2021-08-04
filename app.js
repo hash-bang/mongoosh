@@ -71,12 +71,12 @@ Promise.resolve()
 
 		fs.access(path.join(os.homedir(), '.mongoosh.js'))
 			.then(()=> import(path.join(os.homedir(), '.mongoosh.js')))
-			.then(parsed => _.merge(settings, parsed.default))
+			.then(parsed => _.isFunction(parsed.default) ? parsed.default.call(mongooshContext) : _.merge(settings, parsed.default))
 			.then(()=> true),
 
 		fs.access(path.join(os.homedir(), '.mongoosh.mjs'))
 			.then(()=> import(path.join(os.homedir(), '.mongoosh.mjs')))
-			.then(parsed => _.merge(settings, parsed.default))
+			.then(parsed => _.isFunction(parsed.default) ? parsed.default.call(mongooshContext) : _.merge(settings, parsed.default))
 			.then(()=> true)
 			.catch(()=> false),
 	]))

@@ -63,3 +63,28 @@ MongooSh supports several configuration file types which are loaded when running
 * `~/.mongoosh.json` - Loaded as simple JSON and merged with the global settings
 * `~/.mongoosh.js` - Imported as a CJS script, the contents of `module.exports` is merged with the global settings
 * `~/.mongoosh.mjs` - Imported as a ESM module, the output of `exports default` is merged with the global settings
+
+
+Extending MonooSh
+-----------------
+To add your own commands or other functionality simply extend the context passed to any of the config imports.
+
+All custom commands and config files are called with the context of `mongooshContext` which is an object composed of:
+
+| Key        | Type     | Description                          |
+|------------|----------|--------------------------------------|
+| `repl`     | `Repl`   | The active Node REPL instance        |
+| `settings` | `Object` | POJO for the active session settings |
+
+The context can be mutated by any plugin directly.
+
+For example to define the `foo` custom command add the following to `~/.mongoosh.js`:
+
+```javascript
+// If the config returns a function it is called with the context `mongooshContext`
+module.exports = function() {
+	this.settings.eval.commands.foo = function(bar, baz) { // Glue `foo` into the custom commands object
+		console.log('You tried to run the Foo command with arguments', bar, baz);
+	};
+};
+```
