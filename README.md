@@ -4,8 +4,24 @@ A Mongoose command line shell.
 
 **Features:**
 * It's Mongoose! A much easier to understand wrapper around Mongo with less foot-guns
-* Customizable config files
-* STFU about server messages on boot (e.g. "Oh no you're not using XFS")
+* Does not allow access to non-existant collections - trying to do `db.nonExistantCollection.find()` will error out that find is not callable on undefined
+* Customizable config files along with a plugin system to add your own functionality
+* STFU about server messages on boot - e.g. "Oh no! You're not using XFS!"
+
+
+Installation
+------------
+Install globally by running
+
+```
+> npm install --global mongoosh
+```
+
+And connect to the test database with:
+
+```
+> mongoosh test
+```
 
 
 
@@ -16,7 +32,7 @@ Built in commands
 |--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `db`               | The loaded `Mongoose.model` instance                                                                                                                           |
 | `settings`         | The settings structure MongooSh was booted with                                                                                                                |
-| `use <db>`         | Switch to an alternative datbase by name                                                                                                                       |
+| `use <db>`         | Switch to an alternative database by name                                                                                                                      |
 | `show collections` | List available collections
 | `.break`           | When in the process of inputting a multi-line expression, enter the `.break` command (or press Ctrl+C) to abort further input or processing of that expression |
 | `.clear`           | Resets the REPL context to an empty object and clears any multi-line expression being input                                                                    |
