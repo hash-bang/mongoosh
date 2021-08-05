@@ -23,9 +23,12 @@ program
 	.version(packageMeta.version)
 	.name('mongoosh')
 	.usage('[database]')
-	.option('-v, --verbose', 'Be verbose. Specify multiple times for increasing verbosity', function(i, v) { return v + 1 }, 0)
+	.option('-e, --eval <expr...>', 'Execute an expression and quit. Can be specified multiple times', (v, t) => t.concat([v]), [])
+	.option('-v, --verbose', 'Be verbose. Specify multiple times for increasing verbosity', (t, v) => t + 1, 0)
 	.option('--no-color', 'Force disable color')
 	.parse(process.argv);
+
+const programOpts = program.opts();
 
 // Populate settings structure {{{
 const settings = {
@@ -151,7 +154,7 @@ Promise.resolve()
 				// }}}
 				useGlobal: false,
 				useColors: program.color,
-				prompt: getColor(settings.prompt.color)(settings.prompt.text),
+				prompt: programOpts.eval.length > 0 ? '' : getColor(settings.prompt.color)(settings.prompt.text),
 				ignoreUndefined: settings.prompt.ignoreUndefined,
 				preview: settings.prompt.preview,
 				writer: function(doc) {
@@ -190,6 +193,24 @@ Promise.resolve()
 		// Setup history file
 		if (settings.prompt.history)
 			replInstance.setupHistory(path.join(os.homedir(), settings.prompt.history), ()=> {});
+
+
+		// Process Evals (if any) {{{
+		if (programOpts.eval.length > 0) {
+			let evalOffset = 0;
+			const execQueue = [...programOpts.eval];
+			const execEval = ()=> {
+				if (!execQueue.length) return resolve();
+				replInstance.eval(execQueue.shift(), replInstance.context, `EVAL:${evalOffset++}`, (err, res) => {
+					if (err) return reject(err);
+					Promise.resolve(replInstance.writer(res))
+						.then(content => console.log(content))
+						.then(()=> execEval())
+				});
+			};
+			setTimeout(execEval, 100);
+		}
+		// }}}
 	}))
 	.then(()=> process.exit(0))
 	.catch(e => {
