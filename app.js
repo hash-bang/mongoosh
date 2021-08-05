@@ -3,18 +3,20 @@ import _ from 'lodash';
 import colors from 'chalk';
 import {promises as fs} from 'node:fs';
 import getColor from './lib/getColor.js';
+import {globby} from 'globby';
 import joi from 'joi';
 import os from 'node:os';
 import mongoose from 'mongoose';
 import mongooseConnect from './lib/mongooseConnect.js';
-import mongooshCommands from './lib/mongooshCommands.js';
 import path from 'path';
 import program from 'commander';
 import repl from 'node:repl';
 import ttys from 'ttys';
+import url from 'node:url';
 import util from 'node:util';
 import vm from 'node:vm';
 
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const packageMeta = JSON.parse(await fs.readFile('package.json'));
 
 program
@@ -32,7 +34,7 @@ const settings = {
 		classes: [
 			mongoose.Query,
 		],
-		commands: mongooshCommands,
+		commands: {},
 	},
 	inspect: {
 		depth: 2,
@@ -42,6 +44,11 @@ const settings = {
 		autoConnect: true,
 		database: program.args.shift(),
 		host: 'localhost',
+	},
+	paths: {
+		commands: [
+			`${__dirname}/commands/*.js`,
+		],
 	},
 	prompt: {
 		text: '> ',
@@ -109,9 +116,20 @@ Promise.resolve()
 			},
 		}).validate(settings)
 	)
-	// Settings cleanup {{{
-	// .then(()=> settings.eval.classes = new Set(settings.eval.classes)) // Convert settings.eval.classes into a Set so its easier to parse
 	// }}}
+	// Load commands {{{
+	.then(()=> globby(settings.paths.commands))
+	.then(commandPaths => Promise.all(commandPaths.map(commandPath =>
+		import(commandPath)
+			.then(command => {
+				var {name} = path.parse(commandPath);
+				if (!_.isFunction(command.default)) throw new Error(`Command import from "${commandPath}" did not export a default function`);
+				settings.eval.commands[name] = command.default;
+			})
+			.catch(e => {
+				console.warn(colors.red('ERROR'), 'parsing command', colors.cyan(commandPath), e);
+			})
+	)))
 	// }}}
 	// Connect to Mongoose {{{
 	.then(()=> {
@@ -173,6 +191,6 @@ Promise.resolve()
 	}))
 	.then(()=> process.exit(0))
 	.catch(e => {
-		console.log(colors.red('ERROR', e));
+		console.log(colors.red('ERROR'), e);
 		process.exit(1);
 	})

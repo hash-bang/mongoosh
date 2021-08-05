@@ -5,6 +5,7 @@ A Mongoose command line shell.
 **Features:**
 * It's Mongoose! A much easier to understand wrapper around Mongo with less foot-guns
 * Does not allow access to non-existant collections - trying to do `db.nonExistantCollection.find()` will error out that find is not callable on undefined
+* Easily extendable command plugin system
 * Customizable config files along with a plugin system to add your own functionality
 * STFU about server messages on boot - e.g. "Oh no! You're not using XFS!"
 
@@ -46,29 +47,33 @@ Built in commands
 Settings
 --------
 
-| Setting                  | Type                 | Default               | Description                                                             |
-|--------------------------|----------------------|-----------------------|-------------------------------------------------------------------------|
-| `context`                | `Object`             | See notes             | The context passed to the REPL, see notes below                         |
-| `eval`                   | `Object`             | See below             | Various settings to configure how the command evaluator works           |
-| `eval.classes`           | `Array`              | See notes             | An array of instance functions which should be waited on before output  |
-| `inspect`                | `Object`             | See below             | Settings passed to util.inspect when showing the output of an object    |
-| `inspect.depth`          | `Number`             | `2`                   | The maximum depth to inspect to before digesting the remaining data     |
-| `inspect.colors`         | `Boolean`            | `true`                | Whether to use colors when inspecting                                   |
-| `mongoose`               | `Object`             | See below             | Various options used when connecting to Mongoose                        |
-| `mongoose.autoConnect`   | `Boolean`            | `true`                | Whether to automatically connect to Mongoose and set up `db`            |
-| `mongoose.database`      | `String`             |                       | The database to connect to, if blank use `use <database>` to switch     |
-| `mongoose.host`          | `String`             | `'localhost'`         | Host to connect to                                                      |
-| `prompt`                 | `Object`             | See below             | Various settings to tweak the MongooSh prompt appearance                |
-| `prompt.text`            | `String`             | `'> '`                | The prompt text to display                                              |
-| `prompt.color`           | `String`             | `'bold blue'`         | The coloring to use for the prompt                                      |
-| `prompt.ignoreUndefined` | `Boolean`            | `true`                | Don't print output of commands that return `undefined`                  |
-| `prompt.preview`         | `Boolean`            | `true`                | Show command output previews                                            |
-| `prompt.history`         | `Boolean` / `String` | `'.mongoosh.history'` | Path to a file to store session history. Use boolean `false` to disable |
+| Setting                  | Type                 | Default                      | Description                                                             |
+|--------------------------|----------------------|------------------------------|-------------------------------------------------------------------------|
+| `context`                | `Object`             | See notes                    | The context passed to the REPL, see notes below                         |
+| `eval`                   | `Object`             | See below                    | Various settings to configure how the command evaluator works           |
+| `eval.classes`           | `Array`              | See notes                    | An array of instance functions which should be waited on before output  |
+| `eval.commands`          | `Object<Function>`   | See notes                    | Lookup object of internal commands                                      |
+| `inspect`                | `Object`             | See below                    | Settings passed to util.inspect when showing the output of an object    |
+| `inspect.depth`          | `Number`             | `2`                          | The maximum depth to inspect to before digesting the remaining data     |
+| `inspect.colors`         | `Boolean`            | `true`                       | Whether to use colors when inspecting                                   |
+| `mongoose`               | `Object`             | See below                    | Various options used when connecting to Mongoose                        |
+| `mongoose.autoConnect`   | `Boolean`            | `true`                       | Whether to automatically connect to Mongoose and set up `db`            |
+| `mongoose.database`      | `String`             |                              | The database to connect to, if blank use `use <database>` to switch     |
+| `mongoose.host`          | `String`             | `'localhost'`                | Host to connect to                                                      |
+| `paths`                  | `Object`             | See below                    | Object storing various paths to load assets from                        |
+| `paths.commands`         | `Array<String>`      | `['${__dir}/commands/*.js']` | Array of globs to load command plugins from                             |
+| `prompt`                 | `Object`             | See below                    | Various settings to tweak the MongooSh prompt appearance                |
+| `prompt.text`            | `String`             | `'> '`                       | The prompt text to display                                              |
+| `prompt.color`           | `String`             | `'bold blue'`                | The coloring to use for the prompt                                      |
+| `prompt.ignoreUndefined` | `Boolean`            | `true`                       | Don't print output of commands that return `undefined`                  |
+| `prompt.preview`         | `Boolean`            | `true`                       | Show command output previews                                            |
+| `prompt.history`         | `Boolean` / `String` | `'.mongoosh.history'`        | Path to a file to store session history. Use boolean `false` to disable |
 
 
 **Notes:**
 * The `context` setting is populated with the global objects specified in [Built in commands](#built-in-commands)
 * `eval.classes` defaults to suitable list of Mongoose classes such as `Query` which will be evaluated before output
+* `eval.commands` is a lookup object containing internal commands to the function called. see [Extending MonooSh](#extending-monoosh) for more information
 * Colors are any valid [Chalk](https://github.com/chalk/chalk) method separated by spaces e.g. `'blue'`, `'bold underline yellow'`
 
 
@@ -83,6 +88,10 @@ MongooSh supports several configuration file types which are loaded when running
 
 Extending MonooSh
 -----------------
+There are multiple ways to extend MongooSh, all of them revolve around injecting script into the config files (either `.js` or `.mjs` variants).
+
+### Extend commands directly
+
 To add your own commands or other functionality simply extend the context passed to any of the config imports.
 
 All custom commands and config files are called with the context of `mongooshContext` which is an object composed of:
@@ -99,8 +108,36 @@ For example to define the `foo` custom command add the following to `~/.mongoosh
 ```javascript
 // If the config returns a function it is called with the context `mongooshContext`
 module.exports = function() {
-	this.settings.eval.commands.foo = function(bar, baz) { // Glue `foo` into the custom commands object
+
+	// Glue `foo` into the custom commands object
+	this.settings.eval.commands.foo = function(bar, baz) {
 		console.log('You tried to run the Foo command with arguments', bar, baz);
 	};
+
+	// Glue some help text to describe the command in `help`
+	this.settings.eval.commands.foo.description = 'Command that does something';
+
 };
+```
+
+
+### Define a globbable directory for commands
+
+Extend the `settings.paths.commands` array to point to your own custom directory of commands.
+
+
+```javascript
+# In ~/.mongoosh.js
+module.exports = function() {
+	this.settings.paths.commands.push('/home/user/my/dir/of/commands/*.js');
+};
+```
+
+```javascript
+# In /home/user/my/dir/of/commands/awesome.js
+export let description = 'My awesome command';
+
+export default function(foo, bar, baz) {
+	// ... //
+}
 ```
