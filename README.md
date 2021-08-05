@@ -32,9 +32,10 @@ Built in commands
 | Command            | Description                                                                                                                                                    |
 |--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `db`               | The loaded `Mongoose.model` instance                                                                                                                           |
+| `help`             | Built in command to list all other commands with their descriptions                                                                                            |
 | `settings`         | The settings structure MongooSh was booted with                                                                                                                |
 | `use <db>`         | Switch to an alternative database by name                                                                                                                      |
-| `show collections` | List available collections
+| `show collections` | List available collections                                                                                                                                     |
 | `.break`           | When in the process of inputting a multi-line expression, enter the `.break` command (or press Ctrl+C) to abort further input or processing of that expression |
 | `.clear`           | Resets the REPL context to an empty object and clears any multi-line expression being input                                                                    |
 | `.exit`            | Close the I/O stream, causing the REPL to exit                                                                                                                 |

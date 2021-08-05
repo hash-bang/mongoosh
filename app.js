@@ -125,6 +125,8 @@ Promise.resolve()
 				var {name} = path.parse(commandPath);
 				if (!_.isFunction(command.default)) throw new Error(`Command import from "${commandPath}" did not export a default function`);
 				settings.eval.commands[name] = command.default;
+
+				if (command.description) settings.eval.commands[name].description =  command.description; // Glue description onto function if we have one
 			})
 			.catch(e => {
 				console.warn(colors.red('ERROR'), 'parsing command', colors.cyan(commandPath), e);
