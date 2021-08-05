@@ -204,7 +204,7 @@ Promise.resolve()
 				replInstance.eval(execQueue.shift(), replInstance.context, `EVAL:${evalOffset++}`, (err, res) => {
 					if (err) return reject(err);
 					Promise.resolve(replInstance.writer(res))
-						.then(content => console.log(content))
+						.then(content => content !== undefined || settings.prompt.ignoreUndefined && console.log(content))
 						.then(()=> execEval())
 				});
 			};
