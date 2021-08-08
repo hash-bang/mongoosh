@@ -189,6 +189,7 @@ Promise.resolve()
 
 		// Assign context
 		Object.assign(replInstance.context, settings.context);
+		replInstance.context.settings = settings;
 
 		// Setup history file
 		if (settings.prompt.history)
