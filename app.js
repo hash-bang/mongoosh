@@ -144,7 +144,7 @@ Promise.resolve()
 	})
 	// }}}
 	// Repl loop {{{
-	.then(()=> new Promise(resolve => {
+	.then(()=> new Promise((resolve, reject) => {
 		const replInstance = mongooshContext.repl = repl
 			.start({
 				// BUGFIX: If we are reading from a pipe we need ttys to provide us a user terminal rather than trust process.std{in,out} {{{
