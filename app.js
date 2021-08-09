@@ -26,6 +26,8 @@ program
 	.option('-e, --eval <expr...>', 'Execute an expression and quit. Can be specified multiple times', (v, t) => t.concat([v]), [])
 	.option('-v, --verbose', 'Be verbose. Specify multiple times for increasing verbosity', (t, v) => t + 1, 0)
 	.option('--no-color', 'Force disable color')
+	.option('--no-eval-echo', 'Dont output eval command being executed into STDERR')
+	.option('--no-eval-json', 'Dont switch into JSON output mode in eval - use regular terminal inspection system instead')
 	.parse(process.argv);
 
 const programOpts = program.opts();
@@ -33,11 +35,25 @@ const programOpts = program.opts();
 // Populate settings structure {{{
 const settings = {
 	context: {},
+	colors: {
+		evalEchoColorPrefix: 'bgWhite black',
+		evalEchoColorCommand: 'blue',
+		prompt: 'bold blue',
+	},
+	edit: {
+		stringify(obj) {
+			return JSON.stringify(obj, null, '\t');
+		},
+		parse(text) {
+			return JSON.parse(text);
+		},
+	},
 	eval: {
 		classes: [
 			mongoose.Query,
 		],
 		commands: {},
+		echoPrefix: 'EVAL',
 	},
 	inspect: {
 		depth: 2,
@@ -55,7 +71,6 @@ const settings = {
 	},
 	prompt: {
 		text: '> ',
-		color: 'bold blue',
 		ignoreUndefined: true,
 		preview: true,
 		history: '.mongoosh.history',
@@ -154,7 +169,7 @@ Promise.resolve()
 				// }}}
 				useGlobal: false,
 				useColors: program.color,
-				prompt: programOpts.eval.length > 0 ? '' : getColor(settings.prompt.color)(settings.prompt.text),
+				prompt: programOpts.eval.length > 0 ? '' : getColor(settings.colors.prompt)(settings.prompt.text),
 				ignoreUndefined: settings.prompt.ignoreUndefined,
 				preview: settings.prompt.preview,
 				writer: function(doc) {
@@ -202,10 +217,16 @@ Promise.resolve()
 			const execQueue = [...programOpts.eval];
 			const execEval = ()=> {
 				if (!execQueue.length) return resolve();
-				replInstance.eval(execQueue.shift(), replInstance.context, `EVAL:${evalOffset++}`, (err, res) => {
+				var evalCommand = execQueue.shift();
+				if (programOpts.evalEcho) console.warn(
+					getColor(settings.colors.evalEchoColorPrefix)(settings.eval.echoPrefix),
+					getColor(settings.colors.evalEchoColorCommand)(evalCommand)
+				);
+
+				replInstance.eval(evalCommand, replInstance.context, `EVAL:${evalOffset++}`, (err, res) => {
 					if (err) return reject(err);
 					Promise.resolve(replInstance.writer(res))
-						.then(content => content !== undefined || settings.prompt.ignoreUndefined && console.log(content))
+						.then(content => content !== undefined || settings.prompt.ignoreUndefined ? console.log(content) : false)
 						.then(()=> execEval())
 				});
 			};
