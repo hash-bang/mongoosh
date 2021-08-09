@@ -27,7 +27,7 @@ program
 	.option('-v, --verbose', 'Be verbose. Specify multiple times for increasing verbosity', (t, v) => t + 1, 0)
 	.option('--no-color', 'Force disable color')
 	.option('--no-eval-echo', 'Dont output eval command being executed into STDERR')
-	.option('--no-eval-json', 'Dont switch into JSON output mode in eval - use regular terminal inspection system instead')
+	.option('--no-eval-formatter', 'Dont switch to the eval formatter eval mode - use regular terminal formatter')
 	.parse(process.argv);
 
 const programOpts = program.opts();
@@ -54,6 +54,13 @@ const settings = {
 		],
 		commands: {},
 		echoPrefix: 'EVAL',
+		formatter: 'jsonTabs',
+	},
+	formatters: {
+		inspect: doc => util.inspect(doc, settings.inspect),
+		json: doc => JSON.stringify(doc),
+		jsonTabs: doc => JSON.stringify(doc, null, '\t'),
+		jsonSpaces: doc => JSON.stringify(doc, null, '\s\s'),
 	},
 	inspect: {
 		depth: 2,
@@ -70,10 +77,11 @@ const settings = {
 		],
 	},
 	prompt: {
-		text: '> ',
+		history: '.mongoosh.history',
 		ignoreUndefined: true,
 		preview: true,
-		history: '.mongoosh.history',
+		text: '> ',
+		formatter: 'inspect',
 	},
 };
 // }}}
@@ -172,9 +180,7 @@ Promise.resolve()
 				prompt: programOpts.eval.length > 0 ? '' : getColor(settings.colors.prompt)(settings.prompt.text),
 				ignoreUndefined: settings.prompt.ignoreUndefined,
 				preview: settings.prompt.preview,
-				writer: function(doc) {
-					return util.inspect(doc, settings.inspect);
-				},
+				writer: doc => settings.formatters[settings.prompt.formatter](doc),
 				eval: (cmd, context, filename, finish) => { // {{{
 					// Try defined command {{{
 					var cmdBits = cmd.split(/\s+/);
@@ -213,6 +219,8 @@ Promise.resolve()
 
 		// Process Evals (if any) {{{
 		if (programOpts.eval.length > 0) {
+			if (programOpts.evalJson) settings.prompt.formatter = settings.eval.formatter;
+
 			let evalOffset = 0;
 			const execQueue = [...programOpts.eval];
 			const execEval = ()=> {

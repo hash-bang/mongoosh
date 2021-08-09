@@ -48,36 +48,39 @@ Built in commands
 Settings
 --------
 
-| Setting                  | Type                 | Default                      | Description                                                                  |
-|--------------------------|----------------------|------------------------------|------------------------------------------------------------------------------|
-| `colors`                 | `Object`             | See object                   | Various color specifications, see object for full list                       |
-| `context`                | `Object`             | See notes                    | The context passed to the REPL, see notes below                              |
-| `edit`                   | `Object`             | See below                    | Configuration for the `edit` command                                         |
-| `edit.parse`             | `Function`           | (JSON.parse)                 | How to convert the input back from the editor into a Mongo compatible object |
-| `edit.stringify`         | `Function`           | (JSON.stingify using tabs)   | How to convert a Mongo Object into text to pass to the editor                |
-| `eval`                   | `Object`             | See below                    | Various settings to configure how the command evaluator works                |
-| `eval.classes`           | `Array`              | See notes                    | An array of instance functions which should be waited on before output       |
-| `eval.commands`          | `Object<Function>`   | See notes                    | Lookup object of internal commands                                           |
-| `inspect`                | `Object`             | See below                    | Settings passed to util.inspect when showing the output of an object         |
-| `inspect.depth`          | `Number`             | `2`                          | The maximum depth to inspect to before digesting the remaining data          |
-| `inspect.colors`         | `Boolean`            | `true`                       | Whether to use colors when inspecting                                        |
-| `mongoose`               | `Object`             | See below                    | Various options used when connecting to Mongoose                             |
-| `mongoose.autoConnect`   | `Boolean`            | `true`                       | Whether to automatically connect to Mongoose and set up `db`                 |
-| `mongoose.database`      | `String`             |                              | The database to connect to, if blank use `use <database>` to switch          |
-| `mongoose.host`          | `String`             | `'localhost'`                | Host to connect to                                                           |
-| `paths`                  | `Object`             | See below                    | Object storing various paths to load assets from                             |
-| `paths.commands`         | `Array<String>`      | `['${__dir}/commands/*.js']` | Array of globs to load command plugins from                                  |
-| `prompt`                 | `Object`             | See below                    | Various settings to tweak the MongooSh prompt appearance                     |
-| `prompt.text`            | `String`             | `'> '`                       | The prompt text to display                                                   |
-| `prompt.ignoreUndefined` | `Boolean`            | `true`                       | Don't print output of commands that return `undefined`                       |
-| `prompt.preview`         | `Boolean`            | `true`                       | Show command output previews                                                 |
-| `prompt.history`         | `Boolean` / `String` | `'.mongoosh.history'`        | Path to a file to store session history. Use boolean `false` to disable      |
+| Setting                  | Type                 | Default                      | Description                                                                      |
+|--------------------------|----------------------|------------------------------|----------------------------------------------------------------------------------|
+| `colors`                 | `Object`             | See object                   | Various color specifications, see object for full list                           |
+| `context`                | `Object`             | See notes                    | The context passed to the REPL, see notes below                                  |
+| `edit`                   | `Object`             | See below                    | Configuration for the `edit` command                                             |
+| `edit.parse`             | `Function`           | (JSON.parse)                 | How to convert the input back from the editor into a Mongo compatible object     |
+| `edit.stringify`         | `Function`           | (JSON.stingify using tabs)   | How to convert a Mongo Object into text to pass to the editor                    |
+| `eval`                   | `Object`             | See below                    | Various settings to configure how the command evaluator works                    |
+| `eval.classes`           | `Array`              | See notes                    | An array of instance functions which should be waited on before output           |
+| `eval.commands`          | `Object<Function>`   | See notes                    | Lookup object of internal commands                                               |
+| `inspect`                | `Object`             | See below                    | Settings passed to util.inspect when showing the output of an object             |
+| `formatters`             | `Object`             | See notes                    | Definition list of output modes, see `prompt.outputMode` setting or `as` command |
+| `inspect.depth`          | `Number`             | `2`                          | The maximum depth to inspect to before digesting the remaining data              |
+| `inspect.colors`         | `Boolean`            | `true`                       | Whether to use colors when inspecting                                            |
+| `mongoose`               | `Object`             | See below                    | Various options used when connecting to Mongoose                                 |
+| `mongoose.autoConnect`   | `Boolean`            | `true`                       | Whether to automatically connect to Mongoose and set up `db`                     |
+| `mongoose.database`      | `String`             |                              | The database to connect to, if blank use `use <database>` to switch              |
+| `mongoose.host`          | `String`             | `'localhost'`                | Host to connect to                                                               |
+| `paths`                  | `Object`             | See below                    | Object storing various paths to load assets from                                 |
+| `paths.commands`         | `Array<String>`      | `['${__dir}/commands/*.js']` | Array of globs to load command plugins from                                      |
+| `prompt`                 | `Object`             | See below                    | Various settings to tweak the MongooSh prompt appearance                         |
+| `prompt.history`         | `Boolean` / `String` | `'.mongoosh.history'`        | Path to a file to store session history. Use boolean `false` to disable          |
+| `prompt.ignoreUndefined` | `Boolean`            | `true`                       | Don't print output of commands that return `undefined`                           |
+| `prompt.preview`         | `Boolean`            | `true`                       | Show command output previews                                                     |
+| `prompt.text`            | `String`             | `'> '`                       | The prompt text to display                                                       |
+| `prompt.outputMode`      | `String`             | `'inspect'`                  | How to output data to the prompt, uses a method in `formatters`                  |
 
 
 **Notes:**
 * The `context` setting is populated with the global objects specified in [Built in commands](#built-in-commands)
 * `eval.classes` defaults to suitable list of Mongoose classes such as `Query` which will be evaluated before output
 * `eval.commands` is a lookup object containing internal commands to the function called. see [Extending MonooSh](#extending-monoosh) for more information
+* `formatters` is an object of output formatters to print objects. Valid options are `inspect` (using `util.inspect()`), `json` - raw JSON output, `jsonTabs` - tabbed JSON output, `jsonSpaces` - 2 space indentation format
 * All `color.*` keys are strings representing any valid [Chalk](https://github.com/chalk/chalk) methods separated by spaces e.g. `'blue'`, `'bold underline yellow'`
 
 
