@@ -22,7 +22,7 @@ const packageMeta = JSON.parse(await fs.readFile('package.json'));
 program
 	.version(packageMeta.version)
 	.name('mongoosh')
-	.usage('[database]')
+	.usage('[database|URI]')
 	.option('-e, --eval <expr...>', 'Execute an expression and quit. Can be specified multiple times', (v, t) => t.concat([v]), [])
 	.option('-v, --verbose', 'Be verbose. Specify multiple times for increasing verbosity', (t, v) => t + 1, 0)
 	.option('--no-color', 'Force disable color')
@@ -68,8 +68,9 @@ const settings = {
 	},
 	mongoose: {
 		autoConnect: true,
-		database: program.args.shift(),
+		database: '',
 		host: 'localhost',
+		uri: '',
 	},
 	paths: {
 		commands: [
@@ -158,6 +159,18 @@ Promise.resolve()
 				console.warn(colors.red('ERROR'), 'parsing command', colors.cyan(commandPath), e);
 			})
 	)))
+	// }}}
+	// Parse database connection string {{{
+	.then(()=> {
+		var database = program.args.shift();
+		if (/^mongodb\+srv:\/\//.test(database)) { // Parse as mongodb+srv://${ATLAS_USER}:${ATLAS_PASS}@${MONGOHOST}/${DATABASE}
+			settings.mongoose.database = settings.mongoose.host = '';
+			settings.mongoose.uri = database;
+		} else { // Assume raw database name
+			settings.mongoose.uri = '';
+			settings.mongoose.database = database;
+		}
+	})
 	// }}}
 	// Connect to Mongoose {{{
 	.then(()=> {

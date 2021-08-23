@@ -1,6 +1,6 @@
 {
   "name": "mongoosh",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Mongoose command line shell",
   "main": "app.js",
   "bin": {

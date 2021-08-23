@@ -68,6 +68,7 @@ Settings
 | `mongoose.autoConnect`   | `Boolean`            | `true`                       | Whether to automatically connect to Mongoose and set up `db`                     |
 | `mongoose.database`      | `String`             |                              | The database to connect to, if blank use `use <database>` to switch              |
 | `mongoose.host`          | `String`             | `'localhost'`                | Host to connect to                                                               |
+| `mongoose.uri`           | `String`             |                              | Alternate method to specify a full Mongo URI (overrides other settings)          |
 | `paths`                  | `Object`             | See below                    | Object storing various paths to load assets from                                 |
 | `paths.commands`         | `Array<String>`      | `['${__dir}/commands/*.js']` | Array of globs to load command plugins from                                      |
 | `prompt`                 | `Object`             | See below                    | Various settings to tweak the MongooSh prompt appearance                         |
