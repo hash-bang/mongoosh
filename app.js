@@ -34,7 +34,11 @@ const programOpts = program.opts();
 
 // Populate settings structure {{{
 const settings = {
-	context: {},
+	context: {
+		mongoose,
+		OID: mongoose.Types.ObjectId,
+		ObjectID: mongoose.Types.ObjectId,
+	},
 	colors: {
 		evalEchoColorPrefix: 'bgWhite black',
 		evalEchoColorCommand: 'blue',
