@@ -17,7 +17,7 @@ import util from 'node:util';
 import vm from 'node:vm';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const packageMeta = JSON.parse(await fs.readFile('package.json'));
+const packageMeta = JSON.parse(await fs.readFile(`${__dirname}/package.json`));
 
 program
 	.version(packageMeta.version)
@@ -34,7 +34,11 @@ const programOpts = program.opts();
 
 // Populate settings structure {{{
 const settings = {
-	context: {},
+	context: {
+		mongoose,
+		OID: mongoose.Types.ObjectId,
+		ObjectID: mongoose.Types.ObjectId,
+	},
 	colors: {
 		evalEchoColorPrefix: 'bgWhite black',
 		evalEchoColorCommand: 'blue',

@@ -4,8 +4,8 @@ A Mongoose command line shell.
 
 **Features:**
 * It's Mongoose! A much easier to understand wrapper around Mongo with less foot-guns
-* Does not allow access to non-existant collections - trying to do `db.nonExistantCollection.find()` will error out that find is not callable on undefined
-* Easily extendable command plugin system
+* Does not allow access to non-existent collections - trying to do `db.nonExistantCollection.find()` will error out that find is not callable on undefined
+* Easily extendible command plugin system
 * Customizable config files along with a plugin system to add your own functionality
 * STFU about server messages on boot - e.g. "Oh no! You're not using XFS!"
 
@@ -33,7 +33,7 @@ Built in commands
 |-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `as <format> <query>` | Display the output of a given query via a specific formatter. e.g. `as json db.users.findOne()`                                                                |
 | `db`                  | The loaded `Mongoose.model` instance                                                                                                                           |
-| `edit <query>`        | Edit the output of a Mongoose query in your prefered editor, saving the result if changed                                                                      |
+| `edit <query>`        | Edit the output of a Mongoose query in your preferred editor, saving the result if changed                                                                     |
 | `help`                | Built in command to list all other commands with their descriptions                                                                                            |
 | `settings`            | The settings structure MongooSh was booted with                                                                                                                |
 | `use <db>`            | Switch to an alternative database by name                                                                                                                      |
@@ -82,7 +82,7 @@ Settings
 **Notes:**
 * The `context` setting is populated with the global objects specified in [Built in commands](#built-in-commands)
 * `eval.classes` defaults to suitable list of Mongoose classes such as `Query` which will be evaluated before output
-* `eval.commands` is a lookup object containing internal commands to the function called. see [Extending MonooSh](#extending-monoosh) for more information
+* `eval.commands` is a lookup object containing internal commands to the function called. see [Extending MongooSh](#extending-mongoosh) for more information
 * `formatters` is an object of output formatters to print objects. Valid options are `inspect` (using `util.inspect()`), `json` - raw JSON output, `jsonTabs` - tabbed JSON output, `jsonSpaces` - 2 space indentation format
 * All `color.*` keys are strings representing any valid [Chalk](https://github.com/chalk/chalk) methods separated by spaces e.g. `'blue'`, `'bold underline yellow'`
 
@@ -96,8 +96,8 @@ MongooSh supports several configuration file types which are loaded when running
 * `~/.mongoosh.mjs` - Imported as a ESM module, the output of `exports default` is merged with the global settings
 
 
-Extending MonooSh
------------------
+Extending MongooSh
+------------------
 There are multiple ways to extend MongooSh, all of them revolve around injecting script into the config files (either `.js` or `.mjs` variants).
 
 ### Extend commands directly
