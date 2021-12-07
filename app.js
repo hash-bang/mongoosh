@@ -4,6 +4,8 @@ import colors from 'chalk';
 import {promises as fs} from 'node:fs';
 import getColor from './lib/getColor.js';
 import {globby} from 'globby';
+import {execCallback, exec} from './lib/exec.js';
+import {inspect} from 'node:util';
 import joi from 'joi';
 import os from 'node:os';
 import mongoose from 'mongoose';
@@ -13,8 +15,6 @@ import program from 'commander';
 import repl from 'node:repl';
 import ttys from 'ttys';
 import url from 'node:url';
-import util from 'node:util';
-import vm from 'node:vm';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const packageMeta = JSON.parse(await fs.readFile(`${__dirname}/package.json`));
@@ -53,15 +53,12 @@ const settings = {
 		},
 	},
 	eval: {
-		classes: [
-			mongoose.Query,
-		],
 		commands: {},
 		echoPrefix: 'EVAL',
 		formatter: 'jsonTabs',
 	},
 	formatters: {
-		inspect: doc => util.inspect(doc, settings.inspect),
+		inspect: doc => inspect(doc, settings.inspect),
 		json: doc => JSON.stringify(doc),
 		jsonTabs: doc => JSON.stringify(doc, null, '\t'),
 		jsonSpaces: doc => JSON.stringify(doc, null, '\s\s'),
@@ -122,7 +119,6 @@ Promise.resolve()
 		configsLoaded.some(Boolean) // We loaded some config?
 		&& joi.object({ // Check it validates
 			eval: {
-				classes: joi.array(),
 				commands: joi.object().required(),
 			},
 			context: joi.object().required(),
@@ -173,6 +169,7 @@ Promise.resolve()
 		} else { // Assume raw database name
 			settings.mongoose.uri = '';
 			settings.mongoose.database = database;
+			if (!settings.mongoose.database) console.log(colors.gray('No database selected: `show databases` or `use $database` to switch'));
 		}
 	})
 	// }}}
@@ -187,7 +184,7 @@ Promise.resolve()
 	.then(()=> new Promise((resolve, reject) => {
 		const replInstance = mongooshContext.repl = repl
 			.start({
-				// BUGFIX: If we are reading from a pipe we need ttys to provide us a user terminal rather than trust process.std{in,out} {{{
+				// BUGFIX: If we are reading from a pipe we need TTys to provide us a user terminal rather than trust process.std{in,out} {{{
 				input: ttys.stdin,
 				output: ttys.stdout,
 				terminal: true,
@@ -199,28 +196,12 @@ Promise.resolve()
 				preview: settings.prompt.preview,
 				writer: doc => settings.formatters[settings.prompt.formatter](doc),
 				eval: (cmd, context, filename, finish) => { // {{{
-					// Try defined command {{{
-					var cmdBits = cmd.split(/\s+/);
-					cmdBits[0] = cmdBits[0].toLowerCase(); // Lower case command operand automatically to fix case weirdness
-					if (settings.eval.commands[cmdBits[0]]) { // Command exists
-						return Promise.resolve(settings.eval.commands[cmdBits[0]].apply(mongooshContext, cmdBits.slice(1)))
-							.then(result => finish(null, result))
-							.catch(finish)
-					}
-					// }}}
-					// Try to run in context {{{
-					try {
-						var result = vm.runInContext(cmd, context, filename);
-						if (settings.eval.classes.some(evalClass => result instanceof evalClass)) {
-							return Promise.resolve(result)
-								.then(result => finish(null, result))
-						} else { // Don't bother to eval - treat as inline JS func
-							finish(null, result);
-						}
-					} catch (e) {
-						finish(e);
-					}
-					// }}}
+					execCallback(cmd, {
+						mongooshContext,
+						context,
+						evalCommands: true,
+						filename,
+					}, finish);
 				}, // }}}
 			})
 			.on('exit', resolve)
@@ -259,8 +240,11 @@ Promise.resolve()
 		}
 		// }}}
 	}))
+	/// }}}
+	// End {{{
 	.then(()=> process.exit(0))
 	.catch(e => {
 		console.log(colors.red('ERROR'), e);
 		process.exit(1);
 	})
+	// }}}
