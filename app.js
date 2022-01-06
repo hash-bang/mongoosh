@@ -85,6 +85,10 @@ const settings = {
 		text: '> ',
 		formatter: 'inspect',
 	},
+	tables: {
+		headerBold: true,
+		headerUnderline: true,
+	},
 };
 // }}}
 // MongooSh context (used with commands to access internals) {{{

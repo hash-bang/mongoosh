@@ -29,22 +29,22 @@ And connect to the test database with:
 Built in commands
 -----------------
 
-| Command               | Description                                                                                                                                                    |
-|-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `as <format> <query>` | Display the output of a given query via a specific formatter. e.g. `as json db.users.findOne()`                                                                |
-| `db`                  | The loaded `Mongoose.model` instance                                                                                                                           |
-| `edit <query>`        | Edit the output of a Mongoose query in your preferred editor, saving the result if changed                                                                     |
-| `help`                | Built in command to list all other commands with their descriptions                                                                                            |
-| `settings`            | The settings structure MongooSh was booted with                                                                                                                |
-| `use <db>`            | Switch to an alternative database by name                                                                                                                      |
-| `show collections`    | List available collections                                                                                                                                     |
-| `.break`              | When in the process of inputting a multi-line expression, enter the `.break` command (or press Ctrl+C) to abort further input or processing of that expression |
-| `.clear`              | Resets the REPL context to an empty object and clears any multi-line expression being input                                                                    |
-| `.exit`               | Close the I/O stream, causing the REPL to exit                                                                                                                 |
-| `.help`               | Show the list of REPL commands (commands starting with a dot)                                                                                                  |
-| `.save`               | Save the current REPL session to a file e.g. `.save ./file/to/save.js`                                                                                         |
-| `.load`               | Load a file into the current REPL session e.g. `.load ./file/to/load.js`                                                                                       |
-| `.editor`             | Enter editor mode (Ctrl+D to finish, Ctrl+C to cancel)                                                                                                         |
+| Command                        | Description                                                                                                                                                    |
+|--------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `as <format> <query>`          | Display the output of a given query via a specific formatter. e.g. `as json db.users.findOne()`                                                                |
+| `db`                           | The loaded `Mongoose.model` instance                                                                                                                           |
+| `edit <query>`                 | Edit the output of a Mongoose query in your preferred editor, saving the result if changed                                                                     |
+| `help`                         | Built in command to list all other commands with their descriptions                                                                                            |
+| `settings`                     | The settings structure MongooSh was booted with                                                                                                                |
+| `use <db>`                     | Switch to an alternative database by name                                                                                                                      |
+| `show <collections/databases>` | List available collections or databases                                                                                                                        |
+| `.break`                       | When in the process of inputting a multi-line expression, enter the `.break` command (or press Ctrl+C) to abort further input or processing of that expression |
+| `.clear`                       | Resets the REPL context to an empty object and clears any multi-line expression being input                                                                    |
+| `.exit`                        | Close the I/O stream, causing the REPL to exit                                                                                                                 |
+| `.help`                        | Show the list of REPL commands (commands starting with a dot)                                                                                                  |
+| `.save`                        | Save the current REPL session to a file e.g. `.save ./file/to/save.js`                                                                                         |
+| `.load`                        | Load a file into the current REPL session e.g. `.load ./file/to/load.js`                                                                                       |
+| `.editor`                      | Enter editor mode (Ctrl+D to finish, Ctrl+C to cancel)                                                                                                         |
 
 
 Settings
@@ -76,7 +76,8 @@ Settings
 | `prompt.preview`         | `Boolean`            | `true`                       | Show command output previews                                                     |
 | `prompt.text`            | `String`             | `'> '`                       | The prompt text to display                                                       |
 | `prompt.outputMode`      | `String`             | `'inspect'`                  | How to output data to the prompt, uses a method in `formatters`                  |
-
+| `tables.headerBold`       | `Boolean`            | `true`                       | Whether the header row on table output should be bold-face                       |
+| `tables.headerUnderline`  | `Boolean`            | `true`                       | Underline the header area of table output                                        |
 
 **Notes:**
 * The `context` setting is populated with the global objects specified in [Built in commands](#built-in-commands)
