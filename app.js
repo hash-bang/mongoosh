@@ -236,7 +236,7 @@ Promise.resolve()
 				replInstance.eval(evalCommand, replInstance.context, `EVAL:${evalOffset++}`, (err, res) => {
 					if (err) return reject(err);
 					Promise.resolve(replInstance.writer(res))
-						.then(content => content !== undefined || settings.prompt.ignoreUndefined ? console.log(content) : false)
+						.then(content => content !== undefined && !settings.prompt.ignoreUndefined ? console.log(content) : false)
 						.then(()=> execEval())
 				});
 			};
