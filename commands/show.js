@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import ListIt from 'list-it';
 import mongoose from 'mongoose';
 import readable from '@momsfriendlydevco/readable';
@@ -11,9 +12,22 @@ export let description = 'Show an entity such as collections';
 export default function(what) {
 	switch(what.toLowerCase()) {
 		case 'collections':
-			Object.keys(this.settings.context.db)
-				.sort()
-				.forEach(collection => console.log(collection))
+			return Promise.resolve()
+				.then(()=> Promise.all(
+					Object.keys(this.settings.context.db).map(colId =>
+						mongoose.models[colId].estimatedDocumentCount()
+							.then(estDocCount => ({
+								collection: colId,
+								estDocCount,
+							}))
+					)
+				))
+				.then(cols => _.sortBy(cols, 'collection'))
+				.then(cols => console.log(
+					(new ListIt(this.settings.tables))
+						.d(cols)
+						.toString()
+				))
 			break;
 		case 'databases':
 			return Promise.resolve()
